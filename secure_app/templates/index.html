@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>the shop</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/main_style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script src="/static/scripts/mainscript.js"></script>
+</head>
+<body>
+
+    <div id="top_section">
+        <ul class="nav">
+            <li class="top_a"><a class="app_name">app_shop</a></li>
+            <li class="top_a"><a href="#home" class="menu">home</a></li>
+            <li class="top_a"><a href="#news" class="menu">sale</a></li>
+            <li class="top_a"><a href="#contact" class="menu">contact</a></li>
+            <li class="top_a" style="float:right"><div id="dropdownUser">
+                <a class="menu" id="viewdropdown" onclick="showUserContent()">username: {{name_pass}}</a>
+                <div id="dropdownUserContent" onclick="logoutFunction()">
+                    log-out
+                </div>
+            </div>
+        </li>
+          </ul> 
+    </div>
+
+    <div id="middle_section">
+        <div id="middle_left_section">
+            <div id="left_menu">
+                <ul id="left_menu">
+                    <li class="left_menu_button">promos</li>
+                    <li class="left_menu_button">cos</li>
+                    <li class="left_menu_button">cos</li>
+                    <li class="left_menu_button">cos</li>
+                    <li class="left_menu_button">cos</li>
+                    <li class="left_menu_button">cos</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="middle_center_section">
+            <div class="search">
+                Category: <select id="select_product" onchange="changeProductContentSelect()">
+                    <option value="any">any</option>
+                    <option value="chessboards">chessboards</option>
+                    <option value="accessories">accessories</option>
+                    <option value="books">books</option>
+                    <option value="shirts">shirts</option>
+                </select>
+                 | <input type="text" placeholder="Search.." class="search_input" onchange="changeProductContentText()" id="search_product">
+              </div>
+
+              <div class="products">
+                <ul id="av_products">
+                    loading...
+                </ul>
+
+              </div>
+
+        </div>
+
+        <div id="middle_right_section">
+            <p id="sse_test">no. entries: {{number_of_entries}}</p>
+        </div>
+
+    </div>
+
+    <div id="bottom_section">
+            
+    </div>
+
+
+</body>
+</html>

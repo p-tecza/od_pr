@@ -1,0 +1,77 @@
+html{
+    height: 100%;
+    width:100%;
+}
+
+body{
+    background-color: black;
+    color:white;
+    font-family: 'Courier New', Courier, monospace;
+    height: 100%;
+    width:100%;
+    margin:0%;
+}
+
+p.p_center_L{
+    text-align: center;
+    font-size:250%;
+    margin:0%;
+    padding:2%;
+}
+
+.form_center{
+    display: inline-block;
+    text-align:center;
+    width:100%;
+    margin-top:5%;
+}
+
+form.login_form{
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+#login_button{
+    margin-top:10%;
+    width:50%;
+    margin-left:25%;
+    background-color:black;
+    color:white;
+    border:1px solid white;
+}
+
+div.register_center{
+    margin-top:10%;
+    width:100%;
+    text-align: center;
+}
+
+a.register{
+    color:gray;
+    text-decoration: underline;
+}
+
+a.register:hover{
+    cursor:pointer;
+    color:#333311;
+}
+
+
+.logout_success{
+
+    position: absolute; 
+    bottom: 0; 
+    width: 97.5%;
+    margin-left:2.5%; 
+    height: 50px; 
+    opacity:0;
+    animation: fadeOut 4s;
+
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }

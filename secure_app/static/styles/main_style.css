@@ -1,0 +1,200 @@
+html{
+    height: 100%;
+    width:100%;
+}
+
+body{
+    background-color: #222;
+    color:white;
+    font-family: 'Courier New', Courier, monospace;
+    height: 100%;
+    width:100%;
+    margin:0;
+}
+
+#top_section{
+    /* background-color:yellow; */
+    width:100%;
+    height:5%;
+    margin-bottom:0;
+}
+
+#middle_section{
+    /* background-color: white; */
+    display:inline-block;
+    width:100%;
+    height:90%;
+    margin:0;
+    /* border-top:2px solid white; */
+}
+
+#bottom_section{
+    width:100%;
+    height:auto;
+    margin:0;
+    background-color: #222;
+}
+
+#middle_left_section{
+    height:100%;
+    width:10%;
+    float:left;
+    margin:0;
+    background-color:#222;
+    /* outline:1px solid white;
+    outline-offset: -1px; */
+}
+
+#middle_center_section{
+    /* background-color: blueviolet; */
+    /* height:100%; */
+    width:80%;
+    height:100%;
+    float:left;
+    margin:0;
+    background-color:black;
+    /* outline:1px solid white;
+    outline-offset: -1px; */
+}
+
+#middle_right_section{
+    height:100%;
+    width:10%;
+    float:left;
+    margin:0;
+    /* outline:1px solid white;
+    outline-offset: -1px; */
+}
+
+ul.nav{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+    /* border-bottom:2px solid white; */
+    text-align:center;
+}
+  
+li.top_a{
+    float: left;
+}
+  
+li a.menu{
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a.app_name{
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    font-weight: bold;
+}
+  
+li a.menu:hover{
+    background-color: #111;
+    cursor: pointer;
+}
+
+.search{
+    text-align:center;
+    margin-top:2.5%;
+}
+
+option, select{
+    background-color:black;
+    color:white;
+}
+
+input.search_input{
+    width:10%;
+    background-color:black;
+    color:white;
+}
+
+#dropdownUserContent{
+display: none;
+   position:absolute;
+   background-color:#444;
+   min-width: 156px;
+   min-height: 3%;
+   overflow: auto;
+   z-index: 1;
+   padding-top:0.5%;
+   color:white;
+   text-decoration: none;
+}
+
+#dropdownUserContent a:visited{
+    color:white;
+    text-decoration: none;
+}
+
+#dropdownUserContent a:link{
+    color:white;
+    text-decoration: none;
+}
+
+
+#dropdownUserContent:hover{
+    background-color:white;
+    color:#222;
+    cursor:pointer;
+}
+
+.product_image{
+    width:12vw;
+    height:20vh;
+    border:1px solid red;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.product_div{
+    float:left;
+    margin-top:1vh;
+    margin-left:5vw;
+    text-align: center;
+}
+
+.products{
+    margin-top:2vh;
+    margin-left:auto;
+    margin-right:auto;
+    width: 80vw;
+    height: 63vh;
+}
+
+#sse_test{
+    position: absolute;
+    bottom: 0;
+    right: 1;
+}
+
+#left_menu{
+    width:auto;
+    height:auto;
+    margin:0;
+    background-color:#222;
+    margin-top:150%;
+}
+
+li.left_menu_button{
+    padding:10%;
+    background-color:#222;
+    list-style:none;
+    border-top:white solid 1px;
+    text-align: center;
+    margin:0;
+}
+
+li.left_menu_button:hover{
+    background-color: black;
+    cursor:pointer;
+}
