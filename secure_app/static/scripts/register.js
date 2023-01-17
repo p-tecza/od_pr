@@ -76,3 +76,23 @@ function checkPasswordStrength(p){
 
     return p.length*Math.log2(sum)
 }
+
+var sanitizeHTML = function (str) {
+	return str.replace(/[^\w. ]/gi, function (c) {
+		return '&#' + c.charCodeAt(0) + ';';
+	});
+};
+
+function checkIfInputSanitized(){
+
+    let username=document.getElementById("register_name").value;
+    let p=document.getElementById("register_pass").value;
+    let rp=document.getElementById("register_r_pass").value;
+
+    if(p!=sanitizeHTML(p) || rp!=sanitizeHTML(rp) || username!=sanitizeHTML(username)){
+        document.getElementById("register_name").innerHTML=sanitizeHTML(username);
+        document.getElementById("register_pass").innerHTML=sanitizeHTML(p);
+        document.getElementById("register_r_pass").innerHTML=sanitizeHTML(rp);
+    }
+
+}

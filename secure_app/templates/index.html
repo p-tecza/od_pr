@@ -11,8 +11,10 @@
     <div id="top_section">
         <ul class="nav">
             <li class="top_a"><a class="app_name">app</a></li>
+            <li class="top_a"><a class="menu">my-photos</a></li>
+            <li class="top_a"><a class="menu">shared-photos</a></li>
             <li class="top_a" style="float:right"><div id="dropdownUser">
-                <a class="menu" id="viewdropdown" onclick="showUserContent()">username: {{name_pass}}</a>
+                <a class="menu" id="viewdropdown" onclick="showUserContent()">account</a>
                 <div id="dropdownUserContent" onclick="logoutFunction()">
                     log-out
                 </div>
@@ -21,23 +23,17 @@
           </ul> 
     </div>
 
-    <div id="middle_section">
+<div id="center_div">
 
-        </div>
+    <form action="/upload_image" method="post" enctype=multipart/form-data>
+        <input type="file" name="nazwa" accept=".jpg, .jpeg, .png">
+        <input type="submit">
+      </form>
+      <br>{{error}}
 
-        <div id="middle_center_section">
-            
+</div>
 
-        </div>
-
-        <div id="middle_right_section">
-        </div>
-
-    </div>
-
-    <div id="bottom_section">
-            
-    </div>
+    
 
 
 </body>

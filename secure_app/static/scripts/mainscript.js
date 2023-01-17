@@ -1,14 +1,10 @@
-
-
 function showUserContent() {
-    console.log("dz");
     document.getElementById("dropdownUserContent").style.display = "block";
 }
 
 window.onclick = function (event) {
     if (!event.target.matches('#dropdownUserContent')) {
         if (!event.target.matches('#viewdropdown')) {
-            console.log("oob");
             document.getElementById("dropdownUserContent").style.display = "none";
         }
     }

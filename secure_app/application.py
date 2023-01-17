@@ -1,9 +1,11 @@
-from flask import Flask, redirect, url_for, render_template, request, make_response, send_file
+from flask import Flask, redirect, url_for, render_template, request, make_response, send_file, session, flash
 from bcrypt import checkpw, hashpw, gensalt
 from uuid import uuid4
 from flask_sslify import SSLify
 import sqlite3
 import time
+from pathlib import Path
+
 
 from queries import *
 
@@ -13,13 +15,15 @@ from queries import *
 # Kontrola logowania (przy 3 niepoprawnych logowaniach ban, reset licznika przy poprawnym)
 # Inkrementacja długości bana +30 minut co 3 niepoprawne
 # Entropia hasła, nie może być zbyt słabe inaczej nie zarejestrujesz sie
+# Upload zdjec
+# Rodzaj dodawanych plików
+# Walidacja wpisywanych danych do foremek
+
 
 # DO DODANIA:
 # Resetowanie hasła / odzyskanie dostępu
-# Upload zdjec
 # Opoznienie w requestach (nie jest dobrze zrobione xd)
 # Uprawnienia do zdjec
-# Walidacja wpisywanych danych do foremek
 # Bezpieczne przechowywanie plików graficznych
 # Z jakiego ip kto się łączył (może)
 # Sprawdzenie czy hasło nie jest słownikowe
@@ -28,7 +32,12 @@ from queries import *
 app=Flask(__name__)
 # sslify = SSLify(app)
 
+UPLOAD_FOLDER="images/"
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 global_pepper="1208r329h1f933fqiojbgviuoir@!#12e13ss1@fgb93rfqufijobneiwourfer12312#@!#!@"
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = "super secret key"
 
 @app.route("/")
 def login_page():
@@ -37,7 +46,7 @@ def login_page():
 @app.route("/loginattempt", methods=["POST","GET"])
 def main_page():
 
-    time.sleep(2)               #opoznienie logowania
+    time.sleep(1)               #opoznienie logowania
 
     name = request.form["name"]
     password = request.form["pass"]
@@ -60,6 +69,7 @@ def main_page():
 
         if checkpw((password+global_pepper).encode('utf-8'),get_pass_hashed(name)):
             reset_bad_login_counter(name)
+            session['username']=name
             return redirect("/index")
         else:
             if int(increment_bad_login_spree(name))>2:
@@ -84,6 +94,7 @@ def main_page():
 @app.route("/logout", methods=["GET"])
 def logout():
     response= make_response(request.host)
+    session.pop('username',None)
     response.set_cookie('sid', '', expires=0)
     return response 
 
@@ -111,15 +122,35 @@ def add_user():
         print("HASZ:"+str(hash))
         print("(password+global_pepper).encode('utf-8'): ",(password+global_pepper).encode('utf-8'))
         if create_new_user(login,hash):
+            session['username']=login
             return render_template("index.html")
         return render_template("register.html", errorMsg="problem occured while creating account.")
         
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route("/get_image/<image_name>")
-def response_image(image_name):
-    path="product-images/"+image_name
-    return send_file(path,mimetype="img/gif")
+
+@app.route("/upload_image", methods=["POST"])
+def upload_image():
+    
+    if 'nazwa' not in request.files:
+        errormsg='no file part'
+        return render_template("index.html",error=errormsg)
+    image=request.files['nazwa']
+    if image.filename == '':
+        errormsg ='no selected file'
+        return render_template("index.html",error=errormsg)
+    if not allowed_file(image.filename):
+        errormsg='wrong file type (not [jpg, jpeg, png])'
+        return render_template("index.html",error=errormsg)
+
+    user_directory=app.config['UPLOAD_FOLDER']+str(session['username'])
+    Path(user_directory).mkdir(parents=True, exist_ok=True)
+    save_location=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"+str(image.filename)
+    image.save(save_location)
+    return redirect("/index")
 
 
 if __name__=="__main__":

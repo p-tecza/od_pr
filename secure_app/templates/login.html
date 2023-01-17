@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>the shop</title>
+    <title>app</title>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <script>var logoutVar=false</script>
-    <script src="/static/scripts/login.js" type="module"></script>
+    <script src="/static/scripts/login.js"></script>
 </head>
 <body>
 
@@ -14,9 +13,9 @@
 <div class="form_center">
     <form class="login_form" action="/loginattempt" method="post">
         <table>
-            <tr><td>name:</td><td><input name="name" type="text"></td></tr>
-            <tr><td>pass:</td><td><input name="pass" type="password"></td></tr> 
-            <tr><td colspan="2"><input name="submit" type="submit" value="log-in" id="login_button" class="login_btn"></td></tr> 
+            <tr><td>name:</td><td><input name="name" type="text" id="name_input"></td></tr>
+            <tr><td>pass:</td><td><input name="pass" type="password" id="pass_input"></td></tr> 
+            <tr><td colspan="2"><input name="submit" type="submit" value="log-in" id="login_button" class="login_btn" onclick="checkIfInputSanitized()"></td></tr> 
         </table>
     </form>
     <br>{{wrongLoginData}}
