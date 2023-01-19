@@ -1,5 +1,7 @@
 import sqlite3
 from datetime import datetime
+import uuid
+from bcrypt import checkpw, hashpw, gensalt
 
 def check_if_username_exists(name):
     conn = sqlite3.connect('users.db', check_same_thread=False)
@@ -95,3 +97,76 @@ def ban_account_for_minutes(name,duration):
     conn.commit()
 
     return locked_date
+
+def commit_new_restore(name, question, answer):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    code = str(uuid.uuid4())
+    conn.execute("""INSERT INTO RESTORE (NAME,CODE,QUESTION, ANSWER)
+      VALUES (?,?,?,?)""",(name,code,question,answer))
+    conn.commit()
+    conn.close()
+
+    return code
+
+def try_to_change_password(name,old,hash_new,gl_pep):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    # fetched=conn.execute("""SELECT PASS FROM USERS WHERE NAME=?""",(name,))
+    # fetched_val=fetched.fetchall()[0][0]
+
+    # print("name: "+name)
+    # print("fval:",fetched_val)
+
+    if checkpw((old+gl_pep).encode('utf-8'),get_pass_hashed(name)):
+        conn.execute("""UPDATE USERS SET PASS=? WHERE NAME=?""",(hash_new,name,))
+        conn.commit()
+        conn.close()
+        return True
+    else:
+        conn.close()
+        return False
+
+def get_quest_for_user(name):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    fetched=conn.execute("""SELECT QUESTION FROM RESTORE WHERE NAME=?""",(name,))
+    check_fetch=fetched.fetchall()
+
+    if len(check_fetch) == 0:
+        conn.close()
+        return "Error! No question provided for this user."
+    print("fetch: ",check_fetch)
+    print("len fetch: ",len(check_fetch))
+    fetched_val=check_fetch[0][0]
+    conn.close()
+    return fetched_val
+
+def check_if_answer_correct(name,answ):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    fetched=conn.execute("""SELECT ANSWER FROM RESTORE WHERE NAME=?""",(name,))
+    check_fetch=fetched.fetchall()
+    if len(check_fetch) == 0:
+        conn.close()
+        return False
+    fetched_val=check_fetch[0][0]
+
+    if fetched_val == answ:
+        return True
+    return False
+    
+def check_if_code_correct(name,code):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    fetched=conn.execute("""SELECT CODE FROM RESTORE WHERE NAME=?""",(name,))
+    check_fetch=fetched.fetchall()
+    if len(check_fetch) == 0:
+        conn.close()
+        return False
+    fetched_val=check_fetch[0][0]
+
+    if fetched_val == code:
+        return True
+    return False
+
+def just_change_password(name,password):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    conn.execute("""UPDATE USERS SET PASS=? WHERE NAME=?""",(password,name,))
+    conn.commit()
+    conn.close()

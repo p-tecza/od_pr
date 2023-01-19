@@ -17,9 +17,17 @@ print("Opened database successfully")
 # conn.execute("INSERT INTO USERS (NAME,PASS,BAD_LOGIN, UNLOCK_DATE) \
 #       VALUES ('Paul','giga tajne',0,DATETIME('now'))")
 
-# conn.commit()
 
-cursor=conn.execute("SELECT * FROM USERS")
+
+# conn.execute('''CREATE TABLE RESTORE (ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME TEXT NOT NULL,CODE TEXT NOT NULL,QUESTION TEXT NOT NULL,ANSWER TEXT NOT NULL)''')
+
+# conn.execute("INSERT INTO RESTORE (NAME,CODE,QUESTION, ANSWER) \
+#       VALUES ('user','1337','co?','to')")
+
+conn.commit()
+
+
+cursor=conn.execute("SELECT * FROM RESTORE")
 
 for row in cursor:
     print(row)

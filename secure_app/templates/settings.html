@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>app</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script src="/static/scripts/login.js"></script>
+</head>
+<body>
+
+<p class="p_center_L">settings</p>
+
+<p id="chp">change password:</p>
+
+<div class="form_center">
+   
+    <form class="login_form" action="/changepassword" method="post">
+        <table>
+            <tr><td>old:</td><td><input name="name" type="text" id="name_input"></td></tr>
+            <tr><td>new:</td><td><input name="pass" type="password" id="pass_input" onchange="checkData()"></td></tr> 
+            <tr><td colspan="2"><input name="submit" type="submit" value="change" id="login_button" 
+                 class="login_btn" onclick="checkIfInputSanitized()"></td></tr> 
+        </table>
+    </form>
+    <br>
+
+    <p id="error_message">{{error}}</p>
+
+</div>
+
+<input type="button" value="return" onclick="returnToIndex()" id="login_button" class="login_btn"></button>
+
+</body>
+</html>

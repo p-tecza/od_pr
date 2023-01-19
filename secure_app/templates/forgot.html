@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>app</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script src="/static/scripts/login.js"></script>
+</head>
+<body>
+
+<p class="p_center_L">restoring password</p>
+<div class="form_center">
+{% if not fetched_quest %}
+    <form class="login_form" action="/fetchquestion" method="post">
+        <table>
+            <tr><td>login:</td><td><input name="name" type="text" id="name_input"></td></tr>
+            <tr><td colspan="2"><input name="submit" type="submit" value="next" id="login_button" 
+                 class="login_btn" onclick="checkIfInputSanitized()"></td></tr> 
+        </table>
+    </form>
+{% else %}
+<p class="p_center_L">Give proper info (2 options)</p>
+    <form class="login_form" action="/coderestore" method="post">
+        <table>
+            <tr><td>login:</td><td><input name="name" type="text" id="name_input"></td></tr>
+            <tr><td>restore code:</td><td><input name="pass" type="password" id="restorecode"></td></tr>
+            <tr><td>new pass:</td><td><input name="new_pass" type="password" id="pass_input" onchange="checkData()"></td></tr> 
+            <tr><td colspan="2"><input name="submit" type="submit" value="next" id="login_button" 
+                 class="login_btn" onclick="checkIfInputSanitized()"></td></tr> 
+        </table>
+    </form>
+    <br>
+    <p class="p_center_L">OR</p>
+    <br>
+    <form class="login_form" action="/answerrestore" method="post">
+        <table>
+            <tr><td>Question: {{fetched_quest}}</td></tr>
+            <tr><td>login:</td><td><input name="name" type="text" id="name_input"></td></tr>
+            <tr><td>answer:</td><td><input name="pass" type="password" id="answer"></td></tr> 
+            <tr><td>new pass:</td><td><input name="new_pass" type="password" id="pass_input" onchange="checkData()"></td></tr> 
+            <tr><td colspan="2"><input name="submit" type="submit" value="next" id="login_button" 
+                 class="login_btn" onclick="checkIfInputSanitized()"></td></tr> 
+        </table>
+    </form>
+{% endif %}
+
+    <p id="error_message">{{error}}</p>
+
+</div>
+<br>
+<div class="register_center">nevermind? <a href="/">log-in</a></div>
+
+</body>
+</html>

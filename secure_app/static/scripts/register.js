@@ -2,6 +2,8 @@
 
 //KONTROLA HASŁA DODANA
 
+var min_pass_str=50;
+
 function emailValidation(){
 
     email=document.getElementById("email").value;
@@ -28,16 +30,16 @@ function checkData(){
 
         entropy=checkPasswordStrength(p);
 
-        if(p!=rp && entropy>=100){
+        if(p!=rp && entropy>=min_pass_str){
             document.getElementById("register_r_pass").style.backgroundColor="#FBB2B2";
             document.getElementById("login_button").disabled=true;
             document.getElementById("error_message").innerHTML="passwords not equal.";
-        }else if(entropy<100 && p==rp){
+        }else if(entropy<min_pass_str && p==rp){
             document.getElementById("register_pass").style.backgroundColor="#FBB2B2";
             document.getElementById("login_button").disabled=true;
             document.getElementById("error_message").innerHTML="password too weak.";
         }
-        else if(p!=rp && entropy<100){
+        else if(p!=rp && entropy<min_pass_str){
             document.getElementById("register_pass").style.backgroundColor="#FBB2B2";
             document.getElementById("login_button").disabled=true;
             document.getElementById("error_message").innerHTML="passwords not equal and password is too weak.";
@@ -88,11 +90,16 @@ function checkIfInputSanitized(){
     let username=document.getElementById("register_name").value;
     let p=document.getElementById("register_pass").value;
     let rp=document.getElementById("register_r_pass").value;
+    let q = document.getElementById("register_quest").value;
+    let a = document.getElementById("register_answer").value;
 
-    if(p!=sanitizeHTML(p) || rp!=sanitizeHTML(rp) || username!=sanitizeHTML(username)){
+    if(p!=sanitizeHTML(p) || rp!=sanitizeHTML(rp) || username!=sanitizeHTML(username)
+        || q!=sanitizeHTML(q) || a!=sanitizeHTML(a)){
         document.getElementById("register_name").innerHTML=sanitizeHTML(username);
         document.getElementById("register_pass").innerHTML=sanitizeHTML(p);
         document.getElementById("register_r_pass").innerHTML=sanitizeHTML(rp);
+        document.getElementById("register_quest").innerHTML=sanitizeHTML(q);
+        document.getElementById("register_answer").innerHTML=sanitizeHTML(a)
     }
 
 }

@@ -5,6 +5,7 @@ from flask_sslify import SSLify
 import sqlite3
 import time
 from pathlib import Path
+import os
 
 
 from queries import *
@@ -18,19 +19,15 @@ from queries import *
 # Upload zdjec
 # Rodzaj dodawanych plików
 # Walidacja wpisywanych danych do foremek
-
-
-# DO DODANIA:
-# Resetowanie hasła / odzyskanie dostępu
-# Opoznienie w requestach (nie jest dobrze zrobione xd)
-# Uprawnienia do zdjec
-# Bezpieczne przechowywanie plików graficznych
-# Z jakiego ip kto się łączył (może)
+# Resetowanie hasła
+# Odzyskanie dostępu
+# Uprawnienia do zdjec (ubogo)
 # Sprawdzenie czy hasło nie jest słownikowe
 
 
+
 app=Flask(__name__)
-# sslify = SSLify(app)
+sslify = SSLify(app)
 
 UPLOAD_FOLDER="images/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -41,13 +38,12 @@ app.secret_key = "super secret key"
 
 @app.route("/")
 def login_page():
+    session['username']=""
     return render_template("login.html")
 
 @app.route("/loginattempt", methods=["POST","GET"])
 def main_page():
-
-    time.sleep(1)               #opoznienie logowania
-
+    time.sleep(1)     
     name = request.form["name"]
     password = request.form["pass"]
     
@@ -100,6 +96,8 @@ def logout():
 
 @app.route("/index", methods=["POST", "GET"])
 def index():
+    if not session['username']:
+        return redirect("/")
     return render_template("index.html")
 
 
@@ -107,23 +105,35 @@ def index():
 def register_user():
     return render_template("register.html")
 
+@app.route("/settings")
+def settings_user():
+    if not session['username']:
+        return redirect("/")
+    return render_template("settings.html")
+
 @app.route("/addnewuser", methods=["POST"])
 def add_user():
 
     login = request.form["name"]
     password = request.form["pass"]
+    quest=request.form["quest"]
+    answer=request.form["answer"]
 
     if check_if_username_exists(login):
         return render_template("register.html", errorMsg="user with that name already exists.")
     else:
+
+        document=open("common_pass.txt","r")
+        for x in document:
+            if x[0:len(x)-1]==password:
+                return render_template("register.html", errorMsg="password not original enough.")
+
         pass_bytes=(password+global_pepper).encode('utf-8')
         hash=hashpw(pass_bytes,gensalt())
-        print("DANE: "+login + "|" + password )
-        print("HASZ:"+str(hash))
-        print("(password+global_pepper).encode('utf-8'): ",(password+global_pepper).encode('utf-8'))
         if create_new_user(login,hash):
             session['username']=login
-            return render_template("index.html")
+            code=commit_new_restore(login,quest,answer)
+            return render_template("index.html",restoreCode=code)
         return render_template("register.html", errorMsg="problem occured while creating account.")
         
 
@@ -134,11 +144,14 @@ def allowed_file(filename):
 
 @app.route("/upload_image", methods=["POST"])
 def upload_image():
-    
+    if not session['username']:
+        return redirect("/")
     if 'nazwa' not in request.files:
         errormsg='no file part'
         return render_template("index.html",error=errormsg)
     image=request.files['nazwa']
+    is_shared=request.form.get('shared')
+
     if image.filename == '':
         errormsg ='no selected file'
         return render_template("index.html",error=errormsg)
@@ -149,13 +162,107 @@ def upload_image():
     user_directory=app.config['UPLOAD_FOLDER']+str(session['username'])
     Path(user_directory).mkdir(parents=True, exist_ok=True)
     save_location=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"+str(image.filename)
+
+    if is_shared:
+        Path(app.config['UPLOAD_FOLDER']+"__shared__").mkdir(parents=True, exist_ok=True)
+        save_location=app.config['UPLOAD_FOLDER']+"__shared__/"+str(image.filename)
+
     image.save(save_location)
     return redirect("/index")
 
 
+@app.route("/changepassword", methods=["POST"])
+def change_password():
+
+    if not session['username']:
+        return redirect("/")
+
+    print("OK")
+    old=request.form["name"]
+    new=request.form["pass"]
+    name=session['username']
+
+    pass_bytes=(new+global_pepper).encode('utf-8')
+    hash_new=hashpw(pass_bytes,gensalt())
+
+    if try_to_change_password(name,old,hash_new,global_pepper):
+        return render_template("settings.html",error="successfully changed password")
+    else:
+        return render_template("settings.html",error="wrong password")
+
+
+@app.route("/forgot")
+def forgot_password():
+    return render_template("forgot.html")
+
+@app.route("/fetchquestion",methods=["POST"])
+def fetch_quest():
+
+    name=request.form["name"]
+    return render_template("forgot.html",fetched_quest=get_quest_for_user(name))
+
+@app.route("/answerrestore", methods=["POST"])
+def ansrestore():
+    name=request.form["name"]
+    answ=request.form["pass"]
+    new_pass=request.form["new_pass"]
+    if check_if_answer_correct(name,answ):
+        pass_bytes=(new_pass+global_pepper).encode('utf-8')
+        hash=hashpw(pass_bytes,gensalt())
+        just_change_password(name,hash)
+        return render_template("login.html",wrongLoginData="password restored.")
+    else:
+        return render_template("login.html",wrongLoginData="password not restored. wrong data")
+
+@app.route("/coderestore",methods=["POST"])
+def coderestore():
+    name=request.form["name"]
+    code=request.form["pass"]
+    new_pass=request.form["new_pass"]
+
+    if check_if_code_correct(name,code):
+        pass_bytes=(new_pass+global_pepper).encode('utf-8')
+        hash=hashpw(pass_bytes,gensalt())
+        just_change_password(name,hash)
+        return render_template("login.html",wrongLoginData="password restored.")
+    else:
+        return render_template("login.html",wrongLoginData="password not restored. wrong data")
+
+@app.route("/navigate_my_images")
+def nav_my_img():
+    return render_template("images.html")
+
+@app.route("/myimages")
+def return_images():
+
+    path=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"
+    photos=os.listdir(path)
+    return photos
+
+@app.route("/image/<myImage>")
+def show_image(myImage):
+    path=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"
+    return send_file(str(path+str(myImage)), mimetype='image/gif')
+
+
+@app.route("/navigate_shared_images")
+def nav_shared_img():
+    return render_template("shared.html")
+
+@app.route("/sharedimages")
+def return_shared():
+    path=app.config['UPLOAD_FOLDER']+"__shared__/"
+    photos=os.listdir(path)
+    return photos
+
+@app.route("/image-shared/<myImage>")
+def show_shared_image(myImage):
+    path=app.config['UPLOAD_FOLDER']+"__shared__/"
+    return send_file(str(path+str(myImage)), mimetype='image/gif')
+
 if __name__=="__main__":
-    app.run(host="0.0.0.0", port=5678) # nie docker | ssl_context='adhoc'
-    #app.run(host="0.0.0.0", port=5000, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
+    #app.run(host="0.0.0.0", port=5678) # nie docker | ssl_context='adhoc'
+    app.run(host="0.0.0.0", port=5000, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
 
 
 
