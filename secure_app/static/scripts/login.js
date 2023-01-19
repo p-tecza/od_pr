@@ -1,4 +1,5 @@
-flaskAddress="http://localhost:5678";
+//flaskAddress="http://localhost:5678"; //DLA NIE SSL (http)
+flaskAddress="https://localhost:5678"; //DLA SSL (docker glownie) (https)
 var min_pass_str=50;
 
 var sanitizeHTML = function (str) {

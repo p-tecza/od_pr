@@ -1,6 +1,6 @@
 docker build --tag od-test .
 # docker run -p 5000:5000 app-shop-python
 
-docker run -p 5000:5000 -it od-test 
+docker run -p 5678:5678 -it od-test 
 
 docker cp nice_hopper:/python-docker/server.pem .
