@@ -1,5 +1,5 @@
-docker build --tag app-shop-python .
-docker run -p 5000:5000 app-shop-python
+docker build --tag od-test .
+# docker run -p 5000:5000 app-shop-python
 
 docker run -p 5000:5000 -it od-test 
 
