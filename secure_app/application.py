@@ -89,10 +89,8 @@ def main_page():
 
 @app.route("/logout", methods=["GET"])
 def logout():
-    response= make_response(request.host)
     session.pop('username',None)
-    response.set_cookie('sid', '', expires=0)
-    return response 
+    return redirect("/")
 
 @app.route("/index", methods=["POST", "GET"])
 def index():

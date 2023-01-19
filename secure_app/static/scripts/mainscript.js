@@ -1,6 +1,6 @@
 
-//flaskAddress="http://localhost:5678"; //DLA NIE SSL (http)
-flaskAddress="https://localhost:5678"; //DLA SSL (docker glownie) (https)
+//flaskAddress="http://127.0.0.1:5678"; //DLA NIE SSL (http)
+flaskAddress="https://127.0.0.1:5678"; //DLA SSL (docker glownie) (https)
 
 function showUserContent() {
     document.getElementById("dropdownUserContent").style.display = "block";
