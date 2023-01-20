@@ -259,8 +259,8 @@ def show_shared_image(myImage):
     return send_file(str(path+str(myImage)), mimetype='image/gif')
 
 if __name__=="__main__":
-    app.run(host="0.0.0.0", port=5678, ssl_context='adhoc') # nie docker | 
-    #app.run(host="0.0.0.0", port=5000, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
+    #app.run(host="0.0.0.0", port=5678, ssl_context='adhoc') # nie docker | 
+    app.run(host="0.0.0.0", port=5678, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
 
 
 
