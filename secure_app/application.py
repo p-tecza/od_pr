@@ -6,6 +6,7 @@ import sqlite3
 import time
 from pathlib import Path
 import os
+import re
 
 
 from queries import *
@@ -24,17 +25,35 @@ from queries import *
 # Uprawnienia do zdjec (ubogo)
 # Sprawdzenie czy hasło nie jest słownikowe
 
-
-
 app=Flask(__name__)
 sslify = SSLify(app)
 
 UPLOAD_FOLDER="images/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-global_pepper="1208r329h1f933fqiojbgviuoir@!#12e13ss1@fgb93rfqufijobneiwourfer12312#@!#!@"
+p_file=open('/python-docker/db_pep.txt',"r")
+global_pepper=""
+app.secret_key =""
+for s in p_file:
+    if len(s)>20:
+        global_pepper=s
+    elif len(s)>5:
+        app.secret_key=s
+
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.secret_key = "super secret key"
+
+
+def validate_input(this_input=[]):
+    for x in this_input:
+        if len(x)>100 or len(x)==0:
+            return False
+    return True
+
+def replace_html(this_input):
+    re.sub("/</g", "&lt", this_input)
+    re.sub("/>/g", "&gt;", this_input)
+    #new_input = this_input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return this_input
 
 @app.route("/")
 def login_page():
@@ -46,18 +65,14 @@ def main_page():
     time.sleep(1)     
     name = request.form["name"]
     password = request.form["pass"]
-    
-    print("ADDR: "+str(request.remote_addr))
-    # if not hashed_password:
-    #     return render_template("login.html", wrongLoginData="user does not exist.")
 
 
-    # print("DANE: "+name + "|" + password )
-    # print("HASZ:"+str(hashpw((password+global_pepper).encode('utf-8'),gensalt())))
-    # print("(password+global_pepper).encode('utf-8'): ",(password+global_pepper).encode('utf-8'))
+    name=replace_html(name)
+    password=replace_html(password)
 
-    
-    # print("TYP HASH: ",type(get_pass_hashed(name)))
+    if not validate_input([name,password]):
+        return render_template("register.html",wrongLoginData="problem with input")
+
 
     if login_attempt(name):
         if check_if_banned(name):
@@ -73,17 +88,6 @@ def main_page():
                 message="account blocked until "+str(unlock_date)+"."
                 return render_template("login.html",wrongLoginData=message)
     return render_template("login.html",wrongLoginData="incorrect login data.")
-
-    # if checkpw(password.encode('utf-8'),hashed_password):
-    #     sid = str(uuid4())
-    #     authenticated_users[sid] = name
-    #     global name_of_user
-    #     name_of_user=name
-    #     response = redirect("/", code=302)
-    #     response.set_cookie("sid", sid)
-    #     return response
-    # else:
-    #     return render_template("login.html", wrongLoginData="wrong password/username.")
 
     
 
@@ -116,6 +120,14 @@ def add_user():
     password = request.form["pass"]
     quest=request.form["quest"]
     answer=request.form["answer"]
+
+    login = replace_html(login)
+    password=replace_html(password)
+    quest=replace_html(quest)
+    answer=replace_html(answer)
+
+    if not validate_input([login,password,quest,answer]):
+        return render_template("register.html",errorMsg="problem with input")
 
     if check_if_username_exists(login):
         return render_template("register.html", errorMsg="user with that name already exists.")
@@ -175,11 +187,18 @@ def change_password():
     if not session['username']:
         return redirect("/")
 
-    print("OK")
+
     old=request.form["name"]
     new=request.form["pass"]
-    name=session['username']
 
+    old=replace_html(old)
+    new=replace_html(new)
+
+    if not validate_input([old,new]):
+        return render_template("settings.html",error="problem with input")
+
+
+    name=session['username']
     pass_bytes=(new+global_pepper).encode('utf-8')
     hash_new=hashpw(pass_bytes,gensalt())
 
@@ -197,6 +216,11 @@ def forgot_password():
 def fetch_quest():
 
     name=request.form["name"]
+    name=replace_html(name)
+
+    if not validate_input([name]):
+        return render_template("settings.html",error="problem with input")
+
     return render_template("forgot.html",fetched_quest=get_quest_for_user(name))
 
 @app.route("/answerrestore", methods=["POST"])
@@ -204,6 +228,13 @@ def ansrestore():
     name=request.form["name"]
     answ=request.form["pass"]
     new_pass=request.form["new_pass"]
+
+    name=replace_html(name)
+    answ=replace_html(answ)
+    new_pass=replace_html(new_pass)
+
+    if not validate_input([name,answ,new_pass]):
+        return render_template("settings.html",error="problem with input")
     if check_if_answer_correct(name,answ):
         pass_bytes=(new_pass+global_pepper).encode('utf-8')
         hash=hashpw(pass_bytes,gensalt())
@@ -218,6 +249,9 @@ def coderestore():
     code=request.form["pass"]
     new_pass=request.form["new_pass"]
 
+    name=replace_html(name)
+    code=replace_html(code)
+    new_pass=replace_html(new_pass)
     if check_if_code_correct(name,code):
         pass_bytes=(new_pass+global_pepper).encode('utf-8')
         hash=hashpw(pass_bytes,gensalt())
