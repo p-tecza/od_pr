@@ -55,7 +55,9 @@ def answer_validation(answer_input):
     return True
 
 def code_validation(code):
-    x = re.search("[a-z0-9]*-[a-z0-9]*-[a-z0-9]*-[a-z0-9]*-[a-z0-9]*",code)
-    if not code==x:
+    for c in code:
+        if not c.islower() and not c.isdigit() and c!='-':
+            return False
+    if len(code)!=36:
         return False
     return True

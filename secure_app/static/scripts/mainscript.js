@@ -19,21 +19,10 @@ window.onclick = function (event) {
 function logoutFunction() {
     document.getElementById("dropdownUserContent").style.display = "none";
     document.getElementById("dropdownUserContent2").style.display = "none";
-    console.log("lgout");
-
-    localStorage.setItem("logout_bool", "true");
-
     const logoutAjax = new XMLHttpRequest();
 
     logoutAjax.onload = function () {
-        redirectSite = this.responseText;
-        window.location.replace("http://" + redirectSite);
-        document.getElementById("logout_success_info").innerHTML = "logout successful.";
-        console.log(redirectSite);
-        console.log("dzilam");
-        logout_bool = true;
-        window.glob = "test";
-
+        window.location.replace(flaskAddress);
     }
 
     logoutAjax.open("GET", "logout");
@@ -67,9 +56,10 @@ function showOptions(){
 
 }
 
-function logoutFunction(){
-  window.location.reload()
-}
+// function logoutFunction(){
+//   // console.log("logoutfunc")
+//   // window.location.reload()
+// }
 
 
 // function friendsInput(){

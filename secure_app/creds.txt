@@ -14,19 +14,19 @@ qwer123!@#
 ^ stare
 ---------------
 name: testowy1
-pass: QWEqwe123
+pass: QWEqwe123!
 quest: Jak masz na imie?
 answer: pawel 
-code: 7e413e49-1989-48e4-b6ed-2514a7a371ec
+code: 03ec6d73-d5ff-4e8a-a41b-d44dac7e9bc7
 ---------------
 name: testowy2
-pass: QWEqwe123
+pass: QWEqwe123!
 quest: Jak masz na imie?
 answer: pawel
-code: b3eb2926-7612-4577-9898-ac4f1c184fc0
+code: e7a23d26-15c0-4d6b-98c1-ddb080c956cd
 ---------------
 name: testowy3
-pass: QWEqwe123
+pass: QWEqwe123!
 quest: Jak masz na imie?
 answer: pawel 
-code: a2c94be8-b97b-4065-acc2-25f65e672900
+code: c961deb3-0920-4bb9-8f00-cc2f1abe8372

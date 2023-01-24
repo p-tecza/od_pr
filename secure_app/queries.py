@@ -98,11 +98,20 @@ def ban_account_for_minutes(name,duration):
 
     return locked_date
 
-def commit_new_restore(name, question, answer):
+def commit_new_restore(name, question, answer, gl_pep):
     conn = sqlite3.connect('users.db', check_same_thread=False)
     code = str(uuid.uuid4())
+
+    code_bytes=(code+gl_pep).encode('utf-8')
+    code_hash=hashpw(code_bytes,gensalt())
+
+    print(name)
+    print(question)
+    print(answer)
+    print(code)
+
     conn.execute("""INSERT INTO RESTORE (NAME,CODE,QUESTION, ANSWER)
-      VALUES (?,?,?,?)""",(name,code,question,answer))
+      VALUES (?,?,?,?)""",(name,code_hash,question,answer))
     conn.commit()
     conn.close()
 
@@ -139,7 +148,7 @@ def get_quest_for_user(name):
     conn.close()
     return fetched_val
 
-def check_if_answer_correct(name,answ):
+def check_if_answer_correct(name,answ,gl_pep):
     conn = sqlite3.connect('users.db', check_same_thread=False)
     fetched=conn.execute("""SELECT ANSWER FROM RESTORE WHERE NAME=?""",(name,))
     check_fetch=fetched.fetchall()
@@ -148,11 +157,11 @@ def check_if_answer_correct(name,answ):
         return False
     fetched_val=check_fetch[0][0]
 
-    if fetched_val == answ:
+    if checkpw((answ+gl_pep).encode('utf-8'),fetched_val):
         return True
     return False
     
-def check_if_code_correct(name,code):
+def check_if_code_correct(name,code,gl_pep):
     conn = sqlite3.connect('users.db', check_same_thread=False)
     fetched=conn.execute("""SELECT CODE FROM RESTORE WHERE NAME=?""",(name,))
     check_fetch=fetched.fetchall()
@@ -161,7 +170,7 @@ def check_if_code_correct(name,code):
         return False
     fetched_val=check_fetch[0][0]
 
-    if fetched_val == code:
+    if checkpw((code+gl_pep).encode('utf-8'),fetched_val):
         return True
     return False
 

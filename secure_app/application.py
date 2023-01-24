@@ -24,14 +24,13 @@ from validation_sanitization import *
 # Walidacja wpisywanych danych do foremek
 # Resetowanie hasła
 # Odzyskanie dostępu
-# Uprawnienia do zdjec (ubogo)
+# Uprawnienia do zdjec (mutual friends muszą być żeby shared-friends działało)
 # Sprawdzenie czy hasło nie jest słownikowe
-
-# Zrób: walidacja danych wejściowych na backendzie (dobra walidacja)
-# sprawdzanie czy zdjęcie jest zdjęciem
-# uprawnienia
+# --------------------------------------------
+# walidacja danych wejściowych na backendzie (dobra walidacja)
+# sprawdzanie czy zdjęcie jest zdjęciem - biblioteka imagehdr
 # hashowanie odpowiedzi i kodu
-# name can contain only letters and numbers - to musi być żeby zdjęcia dobrze obsługiwać
+
 
 
 app=Flask(__name__)
@@ -56,7 +55,6 @@ app.secret_key ="super secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-
 @app.route("/")
 def login_page():
     session['username']=""
@@ -67,7 +65,6 @@ def main_page():
     time.sleep(1)     
     name = request.form["name"]
     password = request.form["pass"]
-
 
     name=replace_html(name)
     password=replace_html(password)
@@ -112,7 +109,7 @@ def index():
         s_var=session['code']
         session['code']=""
         session.pop('code',None)
-        return render_template("index.html",restoreCode=s_var)
+        return render_template("index.html",restoreCode=s_var, user=session['username'])
 
     return render_template("index.html",user=session['username'])
 
@@ -167,10 +164,12 @@ def add_user():
         hash=hashpw(pass_bytes,gensalt())
         if create_new_user(login,hash):
             session['username']=login
-            code=commit_new_restore(login,quest,answer)
+
+            answ_bytes=(answer+global_pepper).encode('utf-8')
+            hash_answ=hashpw(answ_bytes,gensalt())
+            code=commit_new_restore(login,quest,hash_answ,global_pepper)
             session['code']=code
             return redirect("/index")
-            # return render_template("index.html",restoreCode=code)
         return render_template("register.html", errorMsg="problem occured while creating account.")
         
 
@@ -189,11 +188,13 @@ def upload_image():
     image=request.files['nazwa']
     is_shared=request.form.get('shared')
 
+    is_image_valid=imghdr.what(image)
+
+    if is_image_valid is None:
+        return render_template("index.html",error="corrupted image file.")
+
     if not checkbox_validation(is_shared):
         return render_template("index.html",error="something wrong with checkbox.")
-
-
-    print(image)
 
     if image.filename == '':
         errormsg ='no selected file'
@@ -240,6 +241,12 @@ def change_password():
     if not validate_input([old,new]):
         return render_template("settings.html",error="problem with input")
 
+    if not password_validate(old):
+        return render_template("settings.html",error="old passwords' format is not valid")
+
+    if not password_validate(new):
+        return render_template("settings.html",error="new password must be 8 characters long \
+        and contain at least one: big letter, small leter, digit")
 
     name=session['username']
     pass_bytes=(new+global_pepper).encode('utf-8')
@@ -291,7 +298,7 @@ def ansrestore():
     if not password_validate(new_pass):
         return render_template("forgot.html",error="new pass too weak!",fetched_quest="error! not correct restoration attempt")
 
-    if check_if_answer_correct(name,answ):
+    if check_if_answer_correct(name,answ,global_pepper):
         pass_bytes=(new_pass+global_pepper).encode('utf-8')
         hash=hashpw(pass_bytes,gensalt())
         just_change_password(name,hash)
@@ -301,8 +308,6 @@ def ansrestore():
 
 @app.route("/coderestore",methods=["POST"])
 def coderestore():
-    if not session['username']:
-        return redirect("/")
     name=request.form["name"]
     code=request.form["pass"]
     new_pass=request.form["new_pass"]
@@ -319,7 +324,7 @@ def coderestore():
     name=replace_html(name)
     code=replace_html(code)
     new_pass=replace_html(new_pass)
-    if check_if_code_correct(name,code):
+    if check_if_code_correct(name,code,global_pepper):
         pass_bytes=(new_pass+global_pepper).encode('utf-8')
         hash=hashpw(pass_bytes,gensalt())
         just_change_password(name,hash)
