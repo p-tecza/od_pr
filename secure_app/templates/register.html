@@ -14,6 +14,8 @@
 <div class="form_center">
 
     <form class="login_form" action="/addnewuser" method="post">
+        <p>name can contain only letters and numbers</p>
+        <p>password have to contain at least: one big letter, one small letter, one number and be at least 8 characters long</p>
         <table>
             <tr><td>name:</td><td><input id="register_name" name="name" type="text"></td></tr>
             <tr><td>pass:</td><td><input id="register_pass" name="pass" type="password" onchange="checkData()"></td></tr>

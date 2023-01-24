@@ -79,3 +79,15 @@ a.register:hover{
 #chp{
     text-align: center;
 }
+
+.form_center2{
+    text-align: center;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#friends_table{
+    text-align: center;
+    margin-left: auto;
+    margin-right:auto;
+}

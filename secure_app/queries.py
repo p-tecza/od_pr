@@ -170,3 +170,41 @@ def just_change_password(name,password):
     conn.execute("""UPDATE USERS SET PASS=? WHERE NAME=?""",(password,name,))
     conn.commit()
     conn.close()
+
+
+def check_if_already_friends(name,friend):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    fetched=conn.execute("""SELECT FRIEND FROM FRIENDS WHERE NAME=? AND FRIEND=?""",(name,friend,))
+    check_fetch=fetched.fetchall()
+    if len(check_fetch) == 0:
+        conn.close()
+        return False
+    else:
+        return True
+
+def add_new_friend(name, friend):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    conn.execute("""INSERT INTO FRIENDS (NAME,FRIEND) VALUES (?,?)""",(name,friend))
+    conn.commit()
+    conn.close()
+    return True
+
+def get_friends(name):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    fetched=conn.execute("""SELECT FRIEND FROM FRIENDS WHERE NAME=?""",(name,))
+    friend_fetch=fetched.fetchall()
+    friends=[]
+    for x in friend_fetch:
+        friends.append(x[0])
+    return friends
+
+def check_if_mutual_friends(name,friend):
+    conn = sqlite3.connect('users.db', check_same_thread=False)
+    fetched=conn.execute("""SELECT FRIEND FROM FRIENDS WHERE NAME=? AND FRIEND=?""",(friend,name,))
+    check_fetch=fetched.fetchall()
+    print(check_fetch)
+    if len(check_fetch) == 0:
+        conn.close()
+        return False
+    elif len(check_fetch)==1:
+        return True

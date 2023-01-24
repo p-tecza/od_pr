@@ -13,6 +13,7 @@
             <li class="top_a"><a class="app_name">app</a></li>
             <li class="top_a"><a class="menu" href="/navigate_my_images">my-photos</a></li>
             <li class="top_a"><a class="menu" href="/navigate_shared_images">shared-photos</a></li>
+            <li class="top_a"><a class="menu" href="/navigate_friends_images">friends-photos</a></li>
             <li class="top_a" style="float:right"><div id="dropdownUser">
                 <a class="menu" id="viewdropdown" onclick="showUserContent()">account</a>
                 <div id="dropdownUserContent" onclick="logoutFunction()">
@@ -30,7 +31,11 @@
 
     <form action="/upload_image" method="post" enctype=multipart/form-data>
         <input type="file" name="nazwa" accept=".jpg, .jpeg, .png"><br><br>
-        <input type="checkbox" name="shared"> shared?<br><br>
+        <input type="checkbox" name="shared" onchange="showOptions()"> shared?<br><br>
+        <select name="share_how" value="public" id="sharing_select" hidden>
+        <option value="public">public</option>
+        <option value="friends">friends</option>
+        </select>
         <input type="submit">
       </form>
       <br>{{error}}

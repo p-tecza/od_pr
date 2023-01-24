@@ -54,3 +54,30 @@ function showThis(){
     document.getElementById("hiddenCode").hidden = true;
   }
 }
+
+function showOptions(){
+
+    var x = document.getElementById("sharing_select").hidden;
+
+    if (x == true) {
+        document.getElementById("sharing_select").hidden = false;
+      } else {
+        document.getElementById("sharing_select").hidden = true;
+      }
+
+}
+
+
+// function friendsInput(){
+
+//     var x = document.getElementById("friends_input").hidden;
+
+//     if (x == true) {
+//         document.getElementById("friends_input").hidden = false;
+//         document.getElementById("friends_info").hidden = false;
+//       } else {
+//         document.getElementById("friends_input").hidden = true;
+//         document.getElementById("friends_info").hidden = true;
+//       }
+
+// }

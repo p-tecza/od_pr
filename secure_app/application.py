@@ -6,10 +6,11 @@ import sqlite3
 import time
 from pathlib import Path
 import os
-import re
+
 
 
 from queries import *
+from validation_sanitization import *
 
 # CO JEST DODANE:
 # Self-signed certyfikat do dockera
@@ -25,35 +26,35 @@ from queries import *
 # Uprawnienia do zdjec (ubogo)
 # Sprawdzenie czy hasło nie jest słownikowe
 
+# Zrób: walidacja danych wejściowych na backendzie (dobra walidacja)
+# sprawdzanie czy zdjęcie jest zdjęciem
+# uprawnienia
+# hashowanie odpowiedzi i kodu
+# name can contain only letters and numbers - to musi być żeby zdjęcia dobrze obsługiwać
+
+
 app=Flask(__name__)
 sslify = SSLify(app)
 
 UPLOAD_FOLDER="images/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-p_file=open('/python-docker/db_pep.txt',"r")
-global_pepper=""
-app.secret_key =""
-for s in p_file:
-    if len(s)>20:
-        global_pepper=s
-    elif len(s)>5:
-        app.secret_key=s
+# p_file=open('/python-docker/db_pep.txt',"r")
+# global_pepper=""
+# app.secret_key =""
+# for s in p_file:
+#     if len(s)>20:
+#         global_pepper=s
+#     elif len(s)>5:
+#         app.secret_key=s
+
+# DO DEVELOPMENTU
+global_pepper="1208r329h1f933fqiojbgviuoir@!#12e13ss1@fgb93rfqufijobneiwourfer12312#@!#!@"
+app.secret_key ="super secret key"
 
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def validate_input(this_input=[]):
-    for x in this_input:
-        if len(x)>100 or len(x)==0:
-            return False
-    return True
-
-def replace_html(this_input):
-    re.sub("/</g", "&lt", this_input)
-    re.sub("/>/g", "&gt;", this_input)
-    #new_input = this_input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    return this_input
 
 @app.route("/")
 def login_page():
@@ -129,6 +130,9 @@ def add_user():
     if not validate_input([login,password,quest,answer]):
         return render_template("register.html",errorMsg="problem with input")
 
+    if not name_validate(login):
+        return render_template("register.html",errorMsg="bad username")
+
     if check_if_username_exists(login):
         return render_template("register.html", errorMsg="user with that name already exists.")
     else:
@@ -162,6 +166,12 @@ def upload_image():
     image=request.files['nazwa']
     is_shared=request.form.get('shared')
 
+    if not checkbox_validation(is_shared):
+        return render_template("index.html",error="something wrong with checkbox.")
+
+
+    print(image)
+
     if image.filename == '':
         errormsg ='no selected file'
         return render_template("index.html",error=errormsg)
@@ -174,8 +184,18 @@ def upload_image():
     save_location=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"+str(image.filename)
 
     if is_shared:
-        Path(app.config['UPLOAD_FOLDER']+"__shared__").mkdir(parents=True, exist_ok=True)
-        save_location=app.config['UPLOAD_FOLDER']+"__shared__/"+str(image.filename)
+        selected_val=request.form.get('share_how')
+        if not select_validation(selected_val):
+            errormsg='something wrong with selected value'
+            return render_template("index.html",error=errormsg)
+
+        if selected_val == "public":
+            Path(app.config['UPLOAD_FOLDER']+"__shared__").mkdir(parents=True, exist_ok=True)
+            save_location=app.config['UPLOAD_FOLDER']+"__shared__/"+str(image.filename)
+        elif selected_val == "friends":
+            user_directory=app.config['UPLOAD_FOLDER']+str(session['username'])+"/shared"
+            Path(user_directory).mkdir(parents=True, exist_ok=True)
+            save_location=user_directory+"/"+str(session['username'])+"-"+str(image.filename)
 
     image.save(save_location)
     return redirect("/index")
@@ -245,6 +265,8 @@ def ansrestore():
 
 @app.route("/coderestore",methods=["POST"])
 def coderestore():
+    if not session['username']:
+        return redirect("/")
     name=request.form["name"]
     code=request.form["pass"]
     new_pass=request.form["new_pass"]
@@ -262,39 +284,121 @@ def coderestore():
 
 @app.route("/navigate_my_images")
 def nav_my_img():
+    if not session['username']:
+        return redirect("/")
     return render_template("images.html")
 
 @app.route("/myimages")
 def return_images():
-
+    if not session['username']:
+        return redirect("/")
     path=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"
     photos=os.listdir(path)
     return photos
 
 @app.route("/image/<myImage>")
 def show_image(myImage):
+    if not session['username']:
+        return redirect("/")
     path=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"
     return send_file(str(path+str(myImage)), mimetype='image/gif')
+
+@app.route("/navigate_friends_images")
+def nav_fr_img():
+    if not session['username']:
+        return redirect("/")
+    return render_template("shared_friends.html")
+
+@app.route("/friendsimages")
+def return_friends_imgs():
+    if not session['username']:
+        return redirect("/")
+    name=session['username']
+    friends=get_friends(name)
+
+    print("friends:",friends)
+
+    all_friends_images=[]
+
+    for x in friends:
+        if check_if_mutual_friends(name,x):
+            path=app.config['UPLOAD_FOLDER']+str(x)+"/shared/"
+            isExist = os.path.exists(path)
+            if not isExist:
+                continue
+            for y in os.listdir(path):
+                all_friends_images.append(y)
+    return all_friends_images
+
+@app.route("/image-friends/<image>")
+def show_friend_image(image):
+    if not session['username']:
+        return redirect("/")
+
+    friend_name=image.split("-")[0]
+
+    print("friend name from filename: ",friend_name)
+
+    path=app.config['UPLOAD_FOLDER']+friend_name+"/shared/"
+    return send_file(str(path+str(image)), mimetype='image/gif')
 
 
 @app.route("/navigate_shared_images")
 def nav_shared_img():
+    if not session['username']:
+        return redirect("/")
     return render_template("shared.html")
 
 @app.route("/sharedimages")
 def return_shared():
+    if not session['username']:
+        return redirect("/")
     path=app.config['UPLOAD_FOLDER']+"__shared__/"
     photos=os.listdir(path)
     return photos
 
 @app.route("/image-shared/<myImage>")
 def show_shared_image(myImage):
+    if not session['username']:
+        return redirect("/")
     path=app.config['UPLOAD_FOLDER']+"__shared__/"
     return send_file(str(path+str(myImage)), mimetype='image/gif')
 
+
+@app.route("/newfriend", methods=["POST"])
+def new_friend():
+    if not session['username']:
+        return redirect("/")
+    friend=request.form['friend_name']
+    if not validate_input([friend]):
+        return render_template("settings.html",error="problem with input")
+    name=session['username']
+
+    if name==friend:
+        return render_template("settings.html",error="unfortunately you cant add yourself as a friend")
+
+    if login_attempt(friend):
+        if not check_if_already_friends(name,friend):
+            add_new_friend(name, friend)
+            return render_template("settings.html",error="successfully added friend")
+        else:
+            return render_template("settings.html",error="you are already friend with that user")
+    else:
+        return render_template("settings.html",error="this user doesnt exist")
+
+@app.route("/getfriends")
+def getting_friends():
+
+    if not session['username']:
+        return redirect("/")
+    name=session['username']
+    friends=get_friends(name)
+    return friends
+
+
 if __name__=="__main__":
-    #app.run(host="0.0.0.0", port=5678, ssl_context='adhoc') # nie docker | 
-    app.run(host="0.0.0.0", port=5678, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
+    app.run(host="0.0.0.0", port=5678, ssl_context='adhoc') # nie docker | 
+    # app.run(host="0.0.0.0", port=5678, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
 
 
 

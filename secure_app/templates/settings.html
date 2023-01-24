@@ -6,13 +6,13 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <script src="/static/scripts/login.js"></script>
 </head>
-<body>
+<body onload="readSharedFriends()">
 
 <p class="p_center_L">settings</p>
 
-<p id="chp">change password:</p>
-
 <div class="form_center">
+
+    <p id="chp">change password:</p>
    
     <form class="login_form" action="/changepassword" method="post">
         <table>
@@ -24,9 +24,25 @@
     </form>
     <br>
 
-    <p id="error_message">{{error}}</p>
+    <p id="chp">add new friend:</p>
 
+    <form class="login_form" action="/newfriend" method="post">
+        <table>
+            <tr><td>friends' name:</td><td><input name="friend_name" type="text" id="friend_input"></td></tr>
+            <tr><td colspan="2"><input name="submit" type="submit" value="add friend" id="login_button" 
+                 class="login_btn"></td></tr> 
+        </table>
+    </form>
+    <br>
+
+    <p>Currently sharing photos with:</p>
+    <div class="form_center2">
+    <table id="friends_table"></table>
+    <p id="error_message">{{error}}</p>
+    </div>
 </div>
+
+
 
 <input type="button" value="return" onclick="returnToIndex()" id="login_button" class="login_btn"></button>
 

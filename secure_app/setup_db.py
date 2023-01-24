@@ -14,6 +14,11 @@ print("Opened database successfully")
 # print("Table created successfully")
 
 
+# conn.execute('''CREATE TABLE FRIENDS
+#          (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+#          NAME TEXT NOT NULL,
+#          FRIEND TEXT NOT NULL);''')
+
 # conn.execute("INSERT INTO USERS (NAME,PASS,BAD_LOGIN, UNLOCK_DATE) \
 #       VALUES ('Paul','giga tajne',0,DATETIME('now'))")
 
@@ -27,7 +32,7 @@ print("Opened database successfully")
 conn.commit()
 
 
-cursor=conn.execute("SELECT * FROM RESTORE")
+cursor=conn.execute("SELECT * FROM FRIENDS")
 
 for row in cursor:
     print(row)
