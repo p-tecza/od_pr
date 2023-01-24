@@ -67,6 +67,10 @@ function showOptions(){
 
 }
 
+function logoutFunction(){
+  window.location.reload()
+}
+
 
 // function friendsInput(){
 

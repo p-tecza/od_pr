@@ -6,6 +6,7 @@ import sqlite3
 import time
 from pathlib import Path
 import os
+import imghdr
 
 
 
@@ -72,8 +73,13 @@ def main_page():
     password=replace_html(password)
 
     if not validate_input([name,password]):
-        return render_template("register.html",wrongLoginData="problem with input")
+        return render_template("login.html",wrongLoginData="problem with input")
 
+    if not name_validate(name):
+        return render_template("login.html",wrongLoginData="problem with input (n)")
+
+    if not password_validate(password):
+        return render_template("login.html",wrongLoginData="problem with input (p)")
 
     if login_attempt(name):
         if check_if_banned(name):
@@ -101,7 +107,14 @@ def logout():
 def index():
     if not session['username']:
         return redirect("/")
-    return render_template("index.html")
+
+    if 'code' in session:
+        s_var=session['code']
+        session['code']=""
+        session.pop('code',None)
+        return render_template("index.html",restoreCode=s_var)
+
+    return render_template("index.html",user=session['username'])
 
 
 @app.route("/register")
@@ -133,10 +146,18 @@ def add_user():
     if not name_validate(login):
         return render_template("register.html",errorMsg="bad username")
 
+    if not password_validate(password):
+        return render_template("register.html",errorMsg="password not fiting requirements")
+
+    if not question_validation(quest):
+        return render_template("register.html",errorMsg="something's wrong with question")
+
+    if not answer_validation(answer):
+        return render_template("register.html",errorMsg="something's wrong with answer")
+
     if check_if_username_exists(login):
         return render_template("register.html", errorMsg="user with that name already exists.")
     else:
-
         document=open("common_pass.txt","r")
         for x in document:
             if x[0:len(x)-1]==password:
@@ -147,7 +168,9 @@ def add_user():
         if create_new_user(login,hash):
             session['username']=login
             code=commit_new_restore(login,quest,answer)
-            return render_template("index.html",restoreCode=code)
+            session['code']=code
+            return redirect("/index")
+            # return render_template("index.html",restoreCode=code)
         return render_template("register.html", errorMsg="problem occured while creating account.")
         
 
@@ -239,7 +262,10 @@ def fetch_quest():
     name=replace_html(name)
 
     if not validate_input([name]):
-        return render_template("settings.html",error="problem with input")
+        return render_template("forgot.html",error="problem with input")
+
+    if not name_validate(name):
+        return render_template("forgot.html",error="problem with input (n)")
 
     return render_template("forgot.html",fetched_quest=get_quest_for_user(name))
 
@@ -254,7 +280,17 @@ def ansrestore():
     new_pass=replace_html(new_pass)
 
     if not validate_input([name,answ,new_pass]):
-        return render_template("settings.html",error="problem with input")
+        return render_template("forgot.html",error="problem with input",fetched_quest="error! not correct restoration attempt")
+
+    if not name_validate(name):
+        return render_template("forgot.html",error="problem with input (n)",fetched_quest="error! not correct restoration attempt")
+
+    if not answer_validation(answ):
+        return render_template("forgot.html",error="problem with input (a)",fetched_quest="error! not correct restoration attempt")
+
+    if not password_validate(new_pass):
+        return render_template("forgot.html",error="new pass too weak!",fetched_quest="error! not correct restoration attempt")
+
     if check_if_answer_correct(name,answ):
         pass_bytes=(new_pass+global_pepper).encode('utf-8')
         hash=hashpw(pass_bytes,gensalt())
@@ -270,6 +306,15 @@ def coderestore():
     name=request.form["name"]
     code=request.form["pass"]
     new_pass=request.form["new_pass"]
+
+    if not name_validate(name):
+        return render_template("forgot.html",error="problem with input (n)",fetched_quest="error! not correct restoration attempt")
+
+    if not password_validate(new_pass):
+        return render_template("forgot.html",error="new pass too weak!",fetched_quest="error! not correct restoration attempt")
+
+    if not code_validation(code):
+        return render_template("forgot.html",error="wrong code structure!",fetched_quest="error! not correct restoration attempt")
 
     name=replace_html(name)
     code=replace_html(code)
@@ -315,8 +360,6 @@ def return_friends_imgs():
         return redirect("/")
     name=session['username']
     friends=get_friends(name)
-
-    print("friends:",friends)
 
     all_friends_images=[]
 
