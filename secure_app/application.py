@@ -38,18 +38,18 @@ sslify = SSLify(app)
 
 UPLOAD_FOLDER="images/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-# p_file=open('/python-docker/db_pep.txt',"r")
-# global_pepper=""
-# app.secret_key =""
-# for s in p_file:
-#     if len(s)>20:
-#         global_pepper=s
-#     elif len(s)>5:
-#         app.secret_key=s
+p_file=open('/python-docker/db_pep.txt',"r")
+global_pepper=""
+app.secret_key =""
+for s in p_file:
+    if len(s)>20:
+        global_pepper=s
+    elif len(s)>5:
+        app.secret_key=s
 
 # DO DEVELOPMENTU
-global_pepper="1208r329h1f933fqiojbgviuoir@!#12e13ss1@fgb93rfqufijobneiwourfer12312#@!#!@"
-app.secret_key ="super secret key"
+# global_pepper="1208r329h1f933fqiojbgviuoir@!#12e13ss1@fgb93rfqufijobneiwourfer12312#@!#!@"
+# app.secret_key ="super secret key"
 
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -445,8 +445,8 @@ def getting_friends():
 
 
 if __name__=="__main__":
-    app.run(host="0.0.0.0", port=5678, ssl_context='adhoc') # nie docker | 
-    # app.run(host="0.0.0.0", port=5678, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
+    # app.run(host="0.0.0.0", port=5678, ssl_context='adhoc') # nie docker | 
+    app.run(host="0.0.0.0", port=5678, ssl_context=('/python-docker/server.crt','/python-docker/server.key')) #docker
 
 
 
