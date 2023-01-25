@@ -343,6 +343,9 @@ def return_images():
     if not session['username']:
         return redirect("/")
     path=app.config['UPLOAD_FOLDER']+str(session['username'])+"/"
+    isExist = os.path.exists(path)
+    if not isExist:
+        return []
     photos=os.listdir(path)
     return photos
 
@@ -402,6 +405,10 @@ def return_shared():
     if not session['username']:
         return redirect("/")
     path=app.config['UPLOAD_FOLDER']+"__shared__/"
+    isExist = os.path.exists(path)
+    if not isExist:
+        return []
+
     photos=os.listdir(path)
     return photos
 
